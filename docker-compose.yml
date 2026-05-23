@@ -1,0 +1,77 @@
+services:
+  # ── PostgreSQL (production-grade persistence) ──────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: sentinel-x-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       sentinelx
+      POSTGRES_USER:     sentinelx
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinelx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── FastAPI Backend ────────────────────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: sentinel-x-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SECRET_KEY:         ${SECRET_KEY:-change-me-in-production}
+      # Use PostgreSQL when DB_PASSWORD is set, else fall back to SQLite
+      DATABASE_URL:       ${DATABASE_URL:-postgresql+asyncpg://sentinelx:${DB_PASSWORD:-changeme_in_production}@db/sentinelx}
+      OPENAI_API_KEY:     ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY:  ${ANTHROPIC_API_KEY:-}
+      AI_PROVIDER:        ${AI_PROVIDER:-auto}
+      OPENAI_MODEL:       ${OPENAI_MODEL:-gpt-4o-mini}
+      ANTHROPIC_MODEL:    ${ANTHROPIC_MODEL:-claude-sonnet-4-20250514}
+    volumes:
+      - sentinel_data:/data           # SQLite fallback volume
+      - ./backend/data:/app/data      # CICIDS2017 dataset (optional)
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; urllib.request.urlopen('http://localhost:8000/api/health'); sys.exit(0)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── React Frontend ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ""
+    container_name: sentinel-x-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+  # ── Optional: MCP server ────────────────────────────────────────────────────
+  mcp:
+    build: ./backend
+    container_name: sentinel-x-mcp
+    restart: "no"
+    profiles: ["mcp"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://sentinelx:${DB_PASSWORD:-changeme_in_production}@db/sentinelx}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sleep", "infinity"]
+
+volumes:
+  pgdata:
+  sentinel_data:

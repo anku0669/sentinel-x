@@ -1,0 +1,313 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Move all component classes into @layer components so Tailwind
+       utility classes (pl-10, pr-10, etc.) always take precedence ─── */
+@layer components {
+  /* Glass morphism */
+  .glass {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .glass-strong {
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    box-shadow: 0 12px 48px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .glass-dark {
+    background: rgba(11, 13, 26, 0.65);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply relative px-6 py-3 rounded-xl font-semibold text-white overflow-hidden;
+    background: linear-gradient(135deg, #00ffe1 0%, #8b5cf6 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6);
+  }
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-ghost {
+    @apply px-5 py-2.5 rounded-xl font-medium text-white/80;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(0,255,225,0.4);
+    color: white;
+  }
+
+  /* ── FIX: cyber-input no longer sets px-4 so pl-10 / pr-10 work correctly ── */
+  .cyber-input {
+    @apply w-full py-3 rounded-xl text-white placeholder-white/40;
+    /* horizontal padding is intentionally NOT set here —
+       callers add pl-4, pl-10, pr-10 etc. via utility classes */
+    padding-left: 1rem;   /* default — overridden by pl-* utilities */
+    padding-right: 1rem;  /* default — overridden by pr-* utilities */
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+    outline: none;
+  }
+  .cyber-input:focus {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(0,255,225,0.5);
+    box-shadow: 0 0 0 3px rgba(0,255,225,0.15);
+  }
+
+  /* Severity badges */
+  .badge { @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide; }
+  .badge-critical { background: rgba(220,38,38,0.18); color: #fca5a5; border: 1px solid rgba(220,38,38,0.35); }
+  .badge-high     { background: rgba(244,63,94,0.16);  color: #fda4af; border: 1px solid rgba(244,63,94,0.35); }
+  .badge-medium   { background: rgba(251,191,36,0.16); color: #fde68a; border: 1px solid rgba(251,191,36,0.35); }
+  .badge-low      { background: rgba(16,185,129,0.16); color: #86efac; border: 1px solid rgba(16,185,129,0.35); }
+  .badge-info     { background: rgba(6,182,212,0.16);  color: #67e8f9; border: 1px solid rgba(6,182,212,0.35); }
+
+  /* Scan line effect */
+  .scan-line {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,255,225,0.06) 50%, transparent 100%);
+    height: 30%;
+    animation: scan-line 4s linear infinite;
+  }
+
+  /* Glow ring */
+  .glow-ring { position: relative; }
+  .glow-ring::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #00ffe1, #8b5cf6, #f43f5e);
+    z-index: -1;
+    opacity: 0.6;
+    filter: blur(8px);
+  }
+
+  /* Terminal */
+  .terminal {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,0,0,0.6);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    border: 1px solid rgba(0,255,225,0.15);
+    box-shadow: inset 0 0 30px rgba(0,255,225,0.05);
+  }
+  .terminal-prompt::before { content: '$ '; color: #00ffe1; }
+
+  /* Spinner */
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #00ffe1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* Pulse dot */
+  .pulse-dot {
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+  }
+  .pulse-dot::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: #10b981;
+    opacity: 0.6;
+    animation: pulse-ring 1.6s ease-out infinite;
+  }
+  .pulse-dot.danger { background: #ef4444; }
+  .pulse-dot.danger::before { background: #ef4444; }
+}
+
+/* ─── Global resets (outside layers — intentional) ─────────────────────── */
+:root { color-scheme: dark; }
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  height: 100%;
+  background: #05060f;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* ─── Aurora background ────────────────────────────────────────────────── */
+.aurora {
+  position: fixed; inset: 0; z-index: -1;
+  overflow: hidden;
+  background: radial-gradient(ellipse at top, #0d0f25 0%, #05060f 60%);
+}
+.aurora::before, .aurora::after {
+  content: '';
+  position: absolute;
+  width: 60vw; height: 60vw;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.55;
+  animation: float-blob 18s ease-in-out infinite;
+}
+.aurora::before {
+  background: radial-gradient(circle, #00ffe1 0%, transparent 70%);
+  top: -20vw; left: -10vw;
+}
+.aurora::after {
+  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+  bottom: -25vw; right: -15vw;
+  animation-delay: -9s;
+}
+.aurora-extra {
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(ellipse at 30% 70%, rgba(244,63,94,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(0,255,225,0.10) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ─── Neon text ────────────────────────────────────────────────────────── */
+.neon-text {
+  background: linear-gradient(135deg, #00ffe1 0%, #8b5cf6 50%, #f43f5e 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* ─── Cyber grid ───────────────────────────────────────────────────────── */
+.cyber-grid {
+  background-image:
+    linear-gradient(rgba(0,255,225,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,225,0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ffe1, #8b5cf6);
+  border-radius: 4px;
+}
+
+/* ─── Keyframes ────────────────────────────────────────────────────────── */
+/* ── Leaflet overrides — satellite + HUD theme ──────────────────────────────── */
+.leaflet-container {
+  background: #000510 !important;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: crosshair !important;
+}
+
+/* Tooltips */
+.leaflet-tooltip {
+  background: rgba(4, 6, 20, 0.95) !important;
+  border: 1px solid rgba(0, 255, 225, 0.3) !important;
+  color: #e8eaf0 !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 12px rgba(0,255,225,0.1) !important;
+  font-size: 11px;
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+.leaflet-tooltip::before { display: none !important; }
+
+/* Zoom controls */
+.leaflet-control-zoom {
+  border: 1px solid rgba(0,255,225,0.2) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+}
+.leaflet-control-zoom a {
+  background: rgba(4, 6, 20, 0.88) !important;
+  color: #00ffe1 !important;
+  border-color: rgba(0,255,225,0.15) !important;
+  font-size: 16px !important;
+  line-height: 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.leaflet-control-zoom a:hover {
+  background: rgba(0,255,225,0.12) !important;
+  box-shadow: 0 0 12px rgba(0,255,225,0.25) inset !important;
+}
+
+/* Attribution */
+.leaflet-control-attribution {
+  background: rgba(4,6,20,0.75) !important;
+  color: rgba(255,255,255,0.25) !important;
+  font-size: 9px;
+  border-top: 1px solid rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(8px);
+}
+.leaflet-control-attribution a { color: rgba(0,255,225,0.4) !important; }
+
+/* Pane layering — ensure SVG arcs render above tiles */
+.leaflet-overlay-pane { z-index: 400 !important; }
+.leaflet-marker-pane  { z-index: 600 !important; }
+.leaflet-tooltip-pane { z-index: 700 !important; }
+
+/* Scrollbar inside feed */
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,255,225,0.2); border-radius: 4px; }
+
+@keyframes float-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(40px, -60px) scale(1.1); }
+  66%       { transform: translate(-30px, 50px) scale(0.95); }
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+@keyframes scan-line {
+  0%   { top: -30%; }
+  100% { top: 100%; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
