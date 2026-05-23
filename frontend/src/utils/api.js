@@ -1,10 +1,12 @@
 import axios from 'axios'
 
+// On GitHub Pages the app lives at /sentinel-x/ — no backend.
+// API calls will gracefully fail; only auth uses the mock client-side system.
 const baseURL = import.meta.env.VITE_API_URL || ''
 
 const api = axios.create({
   baseURL,
-  timeout: 30000,
+  timeout: 15000,
 })
 
 api.interceptors.request.use((config) => {
@@ -19,7 +21,11 @@ api.interceptors.response.use(
     if (e.response?.status === 401) {
       localStorage.removeItem('sx_token')
       localStorage.removeItem('sx_user')
-      if (location.pathname !== '/login') location.href = '/login'
+      // Correct path for GitHub Pages — base is /sentinel-x/
+      const base = import.meta.env.BASE_URL || '/'
+      if (!location.pathname.endsWith('/login')) {
+        location.href = base + 'login'
+      }
     }
     return Promise.reject(e)
   }
