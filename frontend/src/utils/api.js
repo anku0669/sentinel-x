@@ -1,19 +1,39 @@
 import axios from 'axios'
+import getMockResponse from './mockData'
 
 const TOKEN_KEY  = 'sx_token'
 const SERVER_KEY = 'sx_api_url'
 
 const api = axios.create({ timeout: 20000 })
 
-// ── Dynamically set baseURL from localStorage on every request ────────────────
-// When the user saves a server URL in ServerConfig, all API calls instantly
-// point there — no page reload needed for the base URL itself.
-api.interceptors.request.use((config) => {
-  // Dynamic base URL — reads live from localStorage each request
-  const serverUrl = localStorage.getItem(SERVER_KEY) || ''
-  config.baseURL = serverUrl
+// ── Mock adapter — kicks in when no backend server is configured ──────────────
+function mockAdapter(config) {
+  return new Promise((resolve) => {
+    // Slight delay so the UI feels realistic
+    setTimeout(() => {
+      const data = getMockResponse(config.method, config.url)
+      resolve({
+        data,
+        status: 200,
+        statusText: 'OK (demo)',
+        headers: { 'content-type': 'application/json' },
+        config,
+      })
+    }, 300 + Math.random() * 500)
+  })
+}
 
-  // Auth token
+// ── Request interceptor — set baseURL or mock ─────────────────────────────────
+api.interceptors.request.use((config) => {
+  const serverUrl = localStorage.getItem(SERVER_KEY) || ''
+
+  if (!serverUrl) {
+    // No backend — use mock adapter for everything
+    config.adapter = mockAdapter
+  } else {
+    config.baseURL = serverUrl
+  }
+
   const token = localStorage.getItem(TOKEN_KEY)
   if (token) config.headers.Authorization = `Bearer ${token}`
 
